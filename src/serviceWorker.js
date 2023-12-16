@@ -1,141 +1,113 @@
-// This optional code is used to register a service worker.
-// register() is not called by default.
+// // Import and configure the Firebase SDK
+// // These scripts are made available when the app is served or deployed on Firebase Hosting
+// // If you do not serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup
 
-// This lets the app load faster on subsequent visits in production, and gives
-// it offline capabilities. However, it also means that developers (and users)
-// will only see deployed updates on subsequent visits to a page, after all the
-// existing tabs open on the page have been closed, since previously cached
-// resources are updated in the background.
+// importScripts("https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js");
+// importScripts(
+//   "https://www.gstatic.com/firebasejs/7.14.1/firebase-messaging.js"
+// );
+// //importScripts('/__/firebase/init.js');
+// // var firebaseConfig = {
+// //   apiKey: "AIzaSyAEXRxHsC252y3cImqme2-0ukWS-0VTMoM",
+// //   authDomain: "rnfcmdemo-1416e.firebaseapp.com",
+// //   databaseURL: "https://rnfcmdemo-1416e.firebaseio.com",
+// //   projectId: "rnfcmdemo-1416e",
+// //   storageBucket: "rnfcmdemo-1416e.appspot.com",
+// //   messagingSenderId: "880975358373",
+// //   appId: "1:880975358373:web:d8440ea1a95a358521604c",
+// //   measurementId: "G-5CWQY1CBSW",
+// // };
+// // // Initialize Firebase
+// // firebase.initializeApp(firebaseConfig);
 
-// To learn more about the benefits of this model and instructions on how to
-// opt-in, read https://bit.ly/CRA-PWA
+// // const messaging = firebase.messaging();
 
-const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
-    // [::1] is the IPv6 localhost address.
-    window.location.hostname === '[::1]' ||
-    // 127.0.0.0/8 are considered localhost for IPv4.
-    window.location.hostname.match(
-      /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
-    )
-);
+// const app = initializeApp({
+//   apiKey: "AIzaSyAEXRxHsC252y3cImqme2-0ukWS-0VTMoM",
+//   authDomain: "rnfcmdemo-1416e.firebaseapp.com",
+//   databaseURL: "https://rnfcmdemo-1416e.firebaseio.com",
+//   projectId: "rnfcmdemo-1416e",
+//   storageBucket: "rnfcmdemo-1416e.appspot.com",
+//   messagingSenderId: "880975358373",
+//   appId: "1:880975358373:web:d8440ea1a95a358521604c",
+//   measurementId: "G-5CWQY1CBSW",
+// });
 
-export function register(config) {
-  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
-    // The URL constructor is available in all browsers that support SW.
-    const publicUrl = new URL(process.env.PUBLIC_URL, window.location.href);
-    if (publicUrl.origin !== window.location.origin) {
-      // Our service worker won't work if PUBLIC_URL is on a different origin
-      // from what our page is served on. This might happen if a CDN is used to
-      // serve assets; see https://github.com/facebook/create-react-app/issues/2374
-      return;
-    }
 
-    window.addEventListener('load', () => {
-      const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
+// const auth = getAuth(app);
+// const messaging = getMessaging(app);
 
-      if (isLocalhost) {
-        // This is running on localhost. Let's check if a service worker still exists or not.
-        checkValidServiceWorker(swUrl, config);
+// /**
+//  * Here is is the code snippet to initialize Firebase Messaging in the Service
+//  * Worker when your app is not hosted on Firebase Hosting.
 
-        // Add some additional logging to localhost, pointing developers to the
-        // service worker/PWA documentation.
-        navigator.serviceWorker.ready.then(() => {
-          console.log(
-            'This web app is being served cache-first by a service ' +
-              'worker. To learn more, visit https://bit.ly/CRA-PWA'
-          );
-        });
-      } else {
-        // Is not localhost. Just register service worker
-        registerValidSW(swUrl, config);
-      }
-    });
-  }
-}
+//  // [START initialize_firebase_in_sw]
+//  // Give the service worker access to Firebase Messaging.
+//  // Note that you can only use Firebase Messaging here, other Firebase libraries
+//  // are not available in the service worker.
+//  importScripts('https://www.gstatic.com/firebasejs/7.14.0/firebase-app.js');
+//  importScripts('https://www.gstatic.com/firebasejs/7.14.0/firebase-messaging.js');
 
-function registerValidSW(swUrl, config) {
-  navigator.serviceWorker
-    .register(swUrl)
-    .then(registration => {
-      registration.onupdatefound = () => {
-        const installingWorker = registration.installing;
-        if (installingWorker == null) {
-          return;
-        }
-        installingWorker.onstatechange = () => {
-          if (installingWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
-              // At this point, the updated precached content has been fetched,
-              // but the previous service worker will still serve the older
-              // content until all client tabs are closed.
-              console.log(
-                'New content is available and will be used when all ' +
-                  'tabs for this page are closed. See https://bit.ly/CRA-PWA.'
-              );
+//  // Initialize the Firebase app in the service worker by passing in
+//  // your app's Firebase config object.
+//  // https://firebase.google.com/docs/web/setup#config-object
+//  firebase.initializeApp({
+//    apiKey: 'api-key',
+//    authDomain: 'project-id.firebaseapp.com',
+//    databaseURL: 'https://project-id.firebaseio.com',
+//    projectId: 'project-id',
+//    storageBucket: 'project-id.appspot.com',
+//    messagingSenderId: 'sender-id',
+//    appId: 'app-id',
+//    measurementId: 'G-measurement-id',
+//  });
 
-              // Execute callback
-              if (config && config.onUpdate) {
-                config.onUpdate(registration);
-              }
-            } else {
-              // At this point, everything has been precached.
-              // It's the perfect time to display a
-              // "Content is cached for offline use." message.
-              console.log('Content is cached for offline use.');
+//  // Retrieve an instance of Firebase Messaging so that it can handle background
+//  // messages.
+//  const messaging = firebase.messaging();
+//  // [END initialize_firebase_in_sw]
+//  **/
 
-              // Execute callback
-              if (config && config.onSuccess) {
-                config.onSuccess(registration);
-              }
-            }
-          }
-        };
-      };
-    })
-    .catch(error => {
-      console.error('Error during service worker registration:', error);
-    });
-}
+// // If you would like to customize notifications that are received in the
+// // background (Web app is closed or not in browser focus) then you should
+// // implement this optional method.
+// // [START background_handler]
+// messaging.setBackgroundMessageHandler(function (payload) {
+//   console.log(
+//     "[firebase-messaging-sw.js] Received background message ",
+//     payload
+//   );
+//   // Customize notification here
+//   const notificationTitle = payload.data.title ? payload.data.title : "----";
+//   const notificationBody = payload.data.body ? payload.data.body : "---";
+//   const notificationOptions = {
+//     body: notificationBody,
+//     icon: "/GMH_1024.jpg",
+//   };
 
-function checkValidServiceWorker(swUrl, config) {
-  // Check if the service worker can be found. If it can't reload the page.
-  fetch(swUrl, {
-    headers: { 'Service-Worker': 'script' },
-  })
-    .then(response => {
-      // Ensure service worker exists, and that we really are getting a JS file.
-      const contentType = response.headers.get('content-type');
-      if (
-        response.status === 404 ||
-        (contentType != null && contentType.indexOf('javascript') === -1)
-      ) {
-        // No service worker found. Probably a different app. Reload the page.
-        navigator.serviceWorker.ready.then(registration => {
-          registration.unregister().then(() => {
-            window.location.reload();
-          });
-        });
-      } else {
-        // Service worker found. Proceed as normal.
-        registerValidSW(swUrl, config);
-      }
-    })
-    .catch(() => {
-      console.log(
-        'No internet connection found. App is running in offline mode.'
-      );
-    });
-}
+//   return self.registration.showNotification(
+//     notificationTitle,
+//     notificationOptions
+//   );
+// });
+// // [END background_handler]
 
-export function unregister() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready
-      .then(registration => {
-        registration.unregister();
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  }
-}
+
+import { getMessaging } from "firebase/messaging/sw";
+import { onBackgroundMessage } from "firebase/messaging/sw";
+
+const messaging = getMessaging();
+onBackgroundMessage(messaging, (payload) => {
+  console.log(
+    "[firebase-messaging-sw.js] Received background message ",
+    payload
+  );
+  // Customize notification here
+  const notificationTitle = "Background Message Title";
+  const notificationOptions = {
+    body: "Background Message body.",
+    icon: "/firebase-logo.png",
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});

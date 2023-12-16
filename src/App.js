@@ -1,123 +1,138 @@
-import React, { useRef, useState } from 'react';
-import './App.css';
+import React, { useEffect, useRef, useState } from "react";
+import "./App.css";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getMessaging, getToken } from "firebase/messaging";
 
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-import 'firebase/auth';
-import 'firebase/analytics';
+import { getFirestore, collection, getDocs } from "firebase/firestore/lite";
+// import firebase from 'firebase/app';
+// import 'firebase/firestore';
+// import 'firebase/auth';
+// import 'firebase/analytics';
+// import 'firebase/messaging';
 
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
+const app = initializeApp({
+  apiKey: "AIzaSyAEXRxHsC252y3cImqme2-0ukWS-0VTMoM",
+  authDomain: "rnfcmdemo-1416e.firebaseapp.com",
+  databaseURL: "https://rnfcmdemo-1416e.firebaseio.com",
+  projectId: "rnfcmdemo-1416e",
+  storageBucket: "rnfcmdemo-1416e.appspot.com",
+  messagingSenderId: "880975358373",
+  appId: "1:880975358373:web:d8440ea1a95a358521604c",
+  measurementId: "G-5CWQY1CBSW",
+});
 
-firebase.initializeApp({
-  // your config
-})
-
-const auth = firebase.auth();
-const firestore = firebase.firestore();
-const analytics = firebase.analytics();
-
+const auth = getAuth(app);
+const messaging = getMessaging(app);
 
 function App() {
+  useEffect(() => {
+    requestPermission();
+  }, []);
 
-  const [user] = useAuthState(auth);
-
-  return (
-    <div className="App">
-      <header>
-        <h1>⚛️🔥💬</h1>
-        <SignOut />
-      </header>
-
-      <section>
-        {user ? <ChatRoom /> : <SignIn />}
-      </section>
-
-    </div>
-  );
-}
-
-function SignIn() {
-
-  const signInWithGoogle = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider);
+  function requestPermission() {
+    console.log("Requesting permission...");
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        console.log("Notification permission granted.");
+      }
+    });
+    setTimeout(() => {
+      if(messaging){
+        getToken({
+          vapidKey:
+            "BAzBW34P5CzbSLzHD6SbWG6y400nPvjHLW3bla28ya-QJ_DCXyJCwJAeZcgAVbwdGRCupVow1YHuGZ4pyqg0nk8",
+        })
+          .then((token) => {
+            console.log(token);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    }, 20000);
   }
 
-  return (
-    <>
-      <button className="sign-in" onClick={signInWithGoogle}>Sign in with Google</button>
-      <p>Do not violate the community guidelines or you will be banned for life!</p>
-    </>
-  )
+  
 
+  return <>hello world</>;
 }
 
-function SignOut() {
-  return auth.currentUser && (
-    <button className="sign-out" onClick={() => auth.signOut()}>Sign Out</button>
-  )
-}
+// function SignIn() {
 
+//   const signInWithGoogle = () => {
+//     const provider = new firebase.auth.GoogleAuthProvider();
+//     auth.signInWithPopup(provider);
+//   }
 
-function ChatRoom() {
-  const dummy = useRef();
-  const messagesRef = firestore.collection('messages');
-  const query = messagesRef.orderBy('createdAt').limit(25);
+//   return (
+//     <>
+//       <button className="sign-in" onClick={signInWithGoogle}>Sign in with Google</button>
+//       <p>Do not violate the community guidelines or you will be banned for life!</p>
+//     </>
+//   )
 
-  const [messages] = useCollectionData(query, { idField: 'id' });
+// }
 
-  const [formValue, setFormValue] = useState('');
+// function SignOut() {
+//   return auth.currentUser && (
+//     <button className="sign-out" onClick={() => auth.signOut()}>Sign Out</button>
+//   )
+// }
 
+// function ChatRoom() {
+//   const dummy = useRef();
+//   const messagesRef = firestore.collection('messages');
+//   const query = messagesRef.orderBy('createdAt').limit(25);
 
-  const sendMessage = async (e) => {
-    e.preventDefault();
+//   const [formValue, setFormValue] = useState('');
 
-    const { uid, photoURL } = auth.currentUser;
+//   const sendMessage = async (e) => {
+//     e.preventDefault();
 
-    await messagesRef.add({
-      text: formValue,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      uid,
-      photoURL
-    })
+//     const { uid, photoURL } = auth.currentUser;
 
-    setFormValue('');
-    dummy.current.scrollIntoView({ behavior: 'smooth' });
-  }
+//     await messagesRef.add({
+//       text: formValue,
+//       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+//       uid,
+//       photoURL
+//     })
 
-  return (<>
-    <main>
+//     setFormValue('');
+//     dummy.current.scrollIntoView({ behavior: 'smooth' });
+//   }
 
-      {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg} />)}
+//   return (<>
+//     <main>
 
-      <span ref={dummy}></span>
+//       {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg} />)}
 
-    </main>
+//       <span ref={dummy}></span>
 
-    <form onSubmit={sendMessage}>
+//     </main>
 
-      <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="say something nice" />
+//     <form onSubmit={sendMessage}>
 
-      <button type="submit" disabled={!formValue}>🕊️</button>
+//       <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="say something nice" />
 
-    </form>
-  </>)
-}
+//       <button type="submit" disabled={!formValue}>🕊️</button>
 
+//     </form>
+//   </>)
+// }
 
-function ChatMessage(props) {
-  const { text, uid, photoURL } = props.message;
+// function ChatMessage(props) {
+//   const { text, uid, photoURL } = props.message;
 
-  const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received';
+//   const messageClass = uid === auth.currentUser.uid ? 'sent' : 'received';
 
-  return (<>
-    <div className={`message ${messageClass}`}>
-      <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} />
-      <p>{text}</p>
-    </div>
-  </>)
-}
-
+//   return (<>
+//     <div className={`message ${messageClass}`}>
+//       <img src={photoURL || 'https://api.adorable.io/avatars/23/abott@adorable.png'} />
+//       <p>{text}</p>
+//     </div>
+//   </>)
+// }
 
 export default App;
